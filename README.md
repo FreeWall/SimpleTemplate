@@ -4,7 +4,28 @@ PHP template engine without using PHP in template files for security reasons and
 Example
 =======
 
-Create template engine instance and set array of variables to parsing the template:
+Content of template file (template.tpl):
+```html
+<html>
+<head>
+	<title>{#meta[title]}</title>
+	<meta name="description" content="{#meta[description]|truncate:160}"/>
+	<meta http-equiv="content-type" content="text/html; charset=utf-8"/>
+</head>
+<body>
+	<ul>
+	[#articles]
+		<li>
+			<h2>{#title|truncate:20}</h2>
+			Created: {#created|date:d.m.Y}<br />
+			Views: {#views|number}
+		</li>
+	[/#articles]
+	</ul>
+</body>
+</html>
+```
+Create engine instance and set array of variables to parsing the template:
 ```php
 $variables = array(
 	"meta" => array(
@@ -28,27 +49,6 @@ $variables = array(
 $engine = new SimpleTemplate\Engine($variables);
 $engine->loadTemplate("template.tpl");
 echo $engine->getOutput();
-```
-Content of template file (template.tpl):
-```html
-<html>
-<head>
-	<title>{#meta[title]}</title>
-	<meta name="description" content="{#meta[description]|truncate:160}"/>
-	<meta http-equiv="content-type" content="text/html; charset=utf-8"/>
-</head>
-<body>
-	<ul>
-	[#articles]
-		<li>
-			<h2>{#title|truncate:20}</h2>
-			Created: {#created|date:d.m.Y}<br />
-			Views: {#views|number}
-		</li>
-	[/#articles]
-	</ul>
-</body>
-</html>
 ```
 
 HTML final output:
