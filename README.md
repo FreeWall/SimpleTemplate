@@ -61,19 +61,16 @@ echo $engine->getOutput();
 </head>
 <body>
 	<ul>
-	
 		<li>
 			<h2>Some article</h2>
 			Created: 26.04.2015<br />
 			Views: 4 321
 		</li>
-	
 		<li>
 			<h2>Article title…</h2>
 			Created: 26.04.2015<br />
 			Views: 62 341
 		</li>
-	
 	</ul>
 </body>
 </html>
