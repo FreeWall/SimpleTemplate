@@ -26,6 +26,7 @@ class Parser {
 		if(!$cacheContent){
 			$this->templateContent = $this->parseLoops($this->templateContent,$this->templateParams);
 			$this->templateContent = $this->parseVariables($this->templateContent,$this->templateParams);
+			$this->templateContent = preg_replace("/(^[\r\n]*|[\r\n]+)[\s\t]*[\r\n]+/","\n",$this->templateContent);
 			Cache::saveTemplate($this->hashTemplate,$this->templateContent);
 		}
 		else $this->templateContent = $cacheContent;
