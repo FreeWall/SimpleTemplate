@@ -51,7 +51,7 @@ $engine->loadTemplate("template.tpl");
 echo $engine->getOutput();
 ```
 
-HTML final output:
+##### HTML final output:
 ```html
 <html>
 <head>
