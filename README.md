@@ -42,7 +42,7 @@ $variables = array(
 			"title" => "Article title longer then 20 chars",
 			"created" => time(),
 			"views" => 62341
-		),
+		)
 	)
 );
 
