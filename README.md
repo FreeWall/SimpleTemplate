@@ -29,7 +29,7 @@ $engine = new SimpleTemplate\Engine($variables);
 $engine->loadTemplate("template.tpl");
 echo $engine->getOutput();
 ```
-#### Template file:
+#### Template:
 ```html
 <html>
 <head>
