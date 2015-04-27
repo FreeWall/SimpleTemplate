@@ -1,25 +1,52 @@
 <?php
+
+/**
+ * SimpleTemplate - Parser
+ *
+ * @author Michal Vaněk
+ */
+
 namespace SimpleTemplate;
 
 class Parser {
+	/** @var array */
 	private $templateParams;
+	/** @var array */
 	private $templateParamsTmp;
+	/** @var string */
 	private $templateContent;
+	/** @var string */
 	private $templateContentTmp;
+	/** @var string */
 	private $hashTemplate;
 
+	/**
+	 * Sets array of variables to parse.
+	 * @param array
+	 */
 	public function setParams($params){
 		$this->templateParams = $params;
 	}
 
+	/**
+	 * Sets template content.
+	 * @param string
+	 */
 	public function setContent($content){
 		$this->templateContent = $content;
 	}
 
+	/**
+	 * Returns template content.
+	 * @return string
+	 */
 	public function getOutput(){
 		return $this->templateContent;
 	}
 
+	/**
+	 * Parse template content.
+	 */
 	public function parse(){
 		$this->hashTemplate = md5(json_encode($this->templateParams).$this->templateContent);
 		$cacheContent = Cache::loadTemplate($this->hashTemplate);
@@ -32,6 +59,12 @@ class Parser {
 		else $this->templateContent = $cacheContent;
 	}
 
+	/**
+	 * Parse loops.
+	 * @param string content to parse
+	 * @param array variables to parse
+	 * @return string parsed content
+	 */
 	private function parseLoops($content,$params){
 		while(preg_match('|\[#([a-z]+[a-z0-9_\-\[\]]*)\]|i',$content,$matches)){
 			$parsedContent = null;
@@ -60,11 +93,23 @@ class Parser {
 		return $content;
 	}
 
+	/**
+	 * Parse variables.
+	 * @param string content to parse
+	 * @param array variables to parse
+	 * @return string parsed content
+	 */
 	private function parseVariables($content,$params){
 		$this->templateParamsTmp = $params;
 		return preg_replace_callback('|\{#[a-z0-9_\-\[\]\|:,\.\'\s]+\}|i',array($this,'getVariableTagContent'),$content);
 	}
 
+	/**
+	 * Parse a found variable, detect indexes and filters.
+	 * @param array found variable
+	 * @param bool is variable from [array] tag
+	 * @return string parsed variable
+	 */
 	private function getVariableTagContent($contentTag,$isArray = false){
 		$contentObject = null;
 		$contentName = preg_replace('|^\\'.($isArray ? "[" : "{").'#([a-z0-9_\-]+)(.*)$|i','\\1',$contentTag[0]);
@@ -73,11 +118,7 @@ class Parser {
 		preg_match_all('|\[([a-z0-9_\-]+)\]|i',$contentTag[0],$dimensions);
 		$dimensions = $dimensions[1];
 
-		/** Parse filters */
-		preg_match_all('|\|([a-z0-9_\-:,\.\'\s]+)|i',$contentTag[0],$filters);
-		$filters = $filters[1];
-
-		/** Find object in params */
+		/** Find object */
 		if(!is_object($this->templateParamsTmp) && !isset($this->templateParamsTmp[$contentName])) $contentObject = null;
 		else {
 			if(!empty($dimensions)){
@@ -89,14 +130,19 @@ class Parser {
 			else $contentObject = $this->templateParamsTmp[$contentName];
 		}
 
-		/** Apply filters */
-		if(!empty($filters)){
-			foreach($filters AS $filter){
-				$contentObject = Filters::applyFilter($contentObject,$filter);
+		if(!$isArray){
+			/** Parse filters */
+			preg_match_all('|\|([a-z0-9_\-:,\.\'\s]+)|i',$contentTag[0],$filters);
+			$filters = $filters[1];
+
+			/** Apply filters */
+			if(!empty($filters)){
+				foreach($filters AS $filter){
+					$contentObject = Filters::applyFilter($contentObject,$filter);
+				}
 			}
 		}
 
 		return $contentObject;
 	}
 }
-?>

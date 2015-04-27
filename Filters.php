@@ -1,7 +1,18 @@
 <?php
+
+/**
+ * SimpleTemplate - Filters
+ *
+ * @author Michal Vaněk
+ */
+
 namespace SimpleTemplate;
 
 class Filters {
+	/**
+	 * List of available filters.
+	 * @var array
+	 */
 	private static $filters = array(
 		"upper"      => "SimpleTemplate\\Filters::upper",
 		"lower"      => "SimpleTemplate\\Filters::lower",
@@ -15,6 +26,12 @@ class Filters {
 		"webalize"   => "SimpleTemplate\\Filters::webalize"
 	);
 
+	/**
+	 * Apply filter to variable content.
+	 * @param string variable
+	 * @param string filter
+	 * @return string filtered variable
+	 */
 	public static function applyFilter($s,$filter){
 		$params = explode(":",$filter);
 		$filter = strtolower(array_shift($params));
@@ -22,22 +39,49 @@ class Filters {
 		return (isset(self::$filters[$filter]) ? call_user_func_array(Filters::$filters[$filter],$params) : $s);
 	}
 
+	/**
+	 * Convert to upper case.
+	 * @param string
+	 * @return string
+	 */
 	public static function upper($s){
 		return mb_strtoupper($s,'UTF-8');
 	}
 
+	/**
+	 * Convert to lower case.
+	 * @param string
+	 * @return string
+	 */
 	public static function lower($s){
 		return mb_strtolower($s,'UTF-8');
 	}
 
+	/**
+	 * Convert first character to upper case.
+	 * @param string
+	 * @return string
+	 */
 	public static function firstUpper($s){
 		return self::upper(self::substring($s,0,1)).self::substring($s,1);
 	}
 
+	/**
+	 * Convert first character to lower case.
+	 * @param string
+	 * @return string
+	 */
 	public static function firstLower($s){
 		return self::lower(self::substring($s,0,1)).self::substring($s,1);
 	}
 
+	/**
+	 * Truncates string to maximal length.
+	 * @param string
+	 * @param int
+	 * @param string
+	 * @return string
+	 */
 	public static function truncate($s,$maxLen,$append = "\xE2\x80\xA6"){
 		if(Validate::isNumber($maxLen) && self::length($s) > $maxLen){
 			$maxLen = $maxLen - self::length($append);
@@ -48,10 +92,22 @@ class Filters {
 		return $s;
 	}
 
+	/**
+	 * Repeat a string.
+	 * @param string
+	 * @param int
+	 * @return string
+	 */
 	public static function repeat($s,$count){
 		return str_repeat($s,(Validate::isNumber($count) ? $count : 1));
 	}
 
+	/**
+	 * Returns date/time format.
+	 * @param string|int|DateTime|DateInterval
+	 * @param string format
+	 * @return string
+	 */
 	public static function date($time,$format = null){
 		if($time == null) return null;
 		if(!isset($format)) $format = "d.m.Y";
@@ -66,10 +122,23 @@ class Filters {
 		return strpos($format,'%') === false ? $time->format($format) : strftime($format,$time->format('U'));
 	}
 
+	/**
+	 * Format a number with grouped thousands.
+	 * @param string
+	 * @param int
+	 * @param string
+	 * @param string
+	 * @return string
+	 */
 	public static function number($number,$decimals = 0,$dec_point = '.',$thousands_sep = ' '){
 		return number_format((double)$number,(Validate::isNumber($decimals) ? $decimals : 0),$dec_point,$thousands_sep);
 	}
 
+	/**
+	 * Returns string without accents.
+	 * @param string
+	 * @return string
+	 */
 	public static function toAscii($s){
 		$s = preg_replace('#[^\x09\x0A\x0D\x20-\x7E\xA0-\x{2FF}\x{370}-\x{10FFFF}]#u','',$s);
 		$s = strtr($s,'`\'"^~?',"\x01\x02\x03\x04\x05\x06");
@@ -100,22 +169,37 @@ class Filters {
 		return strtr($s,"\x01\x02\x03\x04\x05\x06",'`\'"^~?');
 	}
 
-	public static function webalize($s,$charlist = null,$lower = true){
+	/**
+	 * Returns cool URL form.
+	 * @param string
+	 * @return string
+	 */
+	public static function webalize($s){
 		$s = self::toAscii($s);
-		if($lower) $s = strtolower($s);
-		$s = preg_replace('#[^a-z0-9'.preg_quote($charlist,'#').']+#i','-',$s);
+		$s = preg_replace('#[^a-z0-9]+#i','-',$s);
 		$s = trim($s,'-');
 		return $s;
 	}
 
+	/**
+	 * Returns UTF-8 string length.
+	 * @param string
+	 * @return string
+	 */
 	public static function length($s){
 		return strlen(utf8_decode($s));
 	}
 
+	/**
+	 * Returns a part of UTF-8 string.
+	 * @param string
+	 * @param int
+	 * @param int
+	 * @return string
+	 */
 	public static function substring($s,$start,$length = null){
 		if($length === null) $length = self::length($s);
 		if(function_exists('mb_substr')) return mb_substr($s,$start,$length,'UTF-8');
 		return iconv_substr($s, $start, $length, 'UTF-8');
 	}
 }
-?>
