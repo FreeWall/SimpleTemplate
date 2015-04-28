@@ -78,7 +78,7 @@ echo $engine->getOutput();
 
 Filters
 =======
-SimpleTemplate allows using filters separated by vertical bar. Filters (or modifiers) are functions which format the data to a special form. Filters may have parameters separated by colon.
+SimpleTemplate allows using filters separated by vertical bar. Filters (or modifiers) are functions which format the data to a special form. Filters may have parameters separated by colon. Filters are derived from [Latte](https://github.com/nette/latte) template engine.
 
 ```html
 {#title|truncate:20|upper}	<!-- prints upper case title truncated to 20 chars -->
@@ -98,4 +98,8 @@ SimpleTemplate allows using filters separated by vertical bar. Filters (or modif
 
 Cache
 =====
-Pending ...
+SimpleTemplate allows caching templates to cache folder. Cache is enabled by default.
+
+```php
+$engine->setCache(true/false);
+```
