@@ -1,6 +1,34 @@
 # SimpleTemplate
 PHP template engine based on regular expressions.
 
+Filters
+=======
+SimpleTemplate allows using filters separated by vertical bar. Filters (or modifiers) are functions which format the data to a special form. Filters may have parameters separated by colon. Filters are derived from [Latte](https://github.com/nette/latte) template engine.
+
+```html
+{#title|truncate:20|upper}	<!-- prints upper case title truncated to 20 chars -->
+```
+
+##### List of filters:
+ - upper
+ - lower
+ - firstUpper
+ - firstLower
+ - truncate (length, append = '…')
+ - repeat (count)
+ - date (format)
+ - number (decimals = 0, dec_point = '.', thousands_sep = ' ')
+ - toAscii
+ - webalize
+
+Cache
+=====
+SimpleTemplate allows caching templates to cache folder. Cache is enabled by default.
+
+```php
+$engine->setCache(true/false);
+```
+
 Getting Started
 ===============
 
@@ -74,32 +102,4 @@ echo $engine->getOutput();
 	</ul>
 </body>
 </html>
-```
-
-Filters
-=======
-SimpleTemplate allows using filters separated by vertical bar. Filters (or modifiers) are functions which format the data to a special form. Filters may have parameters separated by colon. Filters are derived from [Latte](https://github.com/nette/latte) template engine.
-
-```html
-{#title|truncate:20|upper}	<!-- prints upper case title truncated to 20 chars -->
-```
-
-##### List of filters:
- - upper
- - lower
- - firstUpper
- - firstLower
- - truncate (length, append = '…')
- - repeat (count)
- - date (format)
- - number (decimals = 0, dec_point = '.', thousands_sep = ' ')
- - toAscii
- - webalize
-
-Cache
-=====
-SimpleTemplate allows caching templates to cache folder. Cache is enabled by default.
-
-```php
-$engine->setCache(true/false);
 ```
