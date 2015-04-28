@@ -1,8 +1,8 @@
 # SimpleTemplate
 PHP template engine without using PHP in template files for security reasons and allowing editing templates to common users.
 
-Example
-=======
+Getting Started
+===============
 
 Create engine instance and set array of variables to parsing the template:
 ```php
@@ -78,4 +78,8 @@ echo $engine->getOutput();
 
 Filters
 =======
+Pending ...
+
+Cache
+=====
 Pending ...
