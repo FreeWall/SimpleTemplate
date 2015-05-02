@@ -39,13 +39,13 @@ echo $engine->getOutput();
 </head>
 <body>
 	<ul>
-	[#articles]
+		[#articles]
 		<li>
 			<h2>{#title|truncate:20}</h2>
 			Created: {#created|date:d.m.Y}<br />
 			Views: {#views|number}
 		</li>
-	[/#articles]
+		[/#articles]
 	</ul>
 </body>
 </html>
