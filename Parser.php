@@ -51,6 +51,7 @@ class Parser {
 		$this->hashTemplate = md5(json_encode($this->templateParams).$this->templateContent);
 		$cacheContent = Cache::loadTemplate($this->hashTemplate);
 		if(!$cacheContent){
+			$this->templateContent = $this->markConditions($this->templateContent);
 			$this->templateContent = $this->parseLoops($this->templateContent,$this->templateParams);
 			$this->templateContent = $this->parseVariables($this->templateContent,$this->templateParams);
 			$this->templateContent = $this->parseConditions($this->templateContent,$this->templateParams);
@@ -150,6 +151,25 @@ class Parser {
 	}
 
 	/**
+	 * Mark opening and closing {if} tag with numbers
+	 * @param string content to parse
+	 * @return string parsed content
+	 */
+	private function markConditions($content){
+		$content = preg_replace_callback('|\{if #([#a-z0-9_\-\[\]\s=><!]+)\}|i',function($tag){
+			global $ifcount;
+			//$ifcount ++;
+			return "{if-".++$ifcount." #".$tag[1]."}";
+		},$content);
+
+		$content = preg_replace_callback('|\{/if}|i',function($tag){
+			global $ifcount;
+			return "{/if-".$ifcount--."}";
+		},$content);
+		return $content;
+	}
+
+	/**
 	 * Parse {if} conditions.
 	 * @param string content to parse
 	 * @param array variables to parse
@@ -158,13 +178,16 @@ class Parser {
 	private function parseConditions($content,$params){
 		$this->templateParamsTmp = $params;
 
-		/** Conditions without operators */
-		while(preg_match('|\{if #([a-z0-9_\-\[\]]+)\}|i',$content,$matches)){
-			$conditionName = $matches[1];
-			$contentObject = $this->getVariableTagContent(array("{#".$matches[1]."}"));
+		/** Conditions without and with operators */
+		while(preg_match('|\{if-(\d+) #([a-z0-9_\-\[\]]+)\}|i',$content,$matches) || preg_match('|\{if-(\d+) #([a-z0-9_\-\[\]]+)(\s?)([=><!]+)(\s?)([#a-z0-9_\-\[\]]+)\}|i',$content,$matches)){
+			$conditionID = $matches[1];
+			$conditionName = $matches[2].$matches[3].$matches[4].$matches[5].$matches[6];
+			$conditionOperator = $matches[4];
+			$conditionOperand = (preg_match('|#([a-z0-9_\-\[\]]+)|i',$matches[6],$matchesTmp) ? $this->getVariableTagContent(array("{".$matches[6]."}")) : $matches[6]);
+			$contentObject = $this->getVariableTagContent(array("{#".$matches[2]."}"));
 
 			/** Check opening and closing tag */
-			preg_match('|\{if #'.preg_quote($conditionName).'\}(.*?)\{/if #'.preg_quote($conditionName).'\}|is',$content,$matches);
+			preg_match('|\{if-'.$conditionID.' #'.preg_quote($conditionName).'\}(.*?)\{/if-'.$conditionID.'\}|is',$content,$matches);
 			if(count($matches) == 0) throw new Exception("Mismatched if tag '$conditionName'.");
 
 			/** Outer and inner if content */
@@ -172,17 +195,36 @@ class Parser {
 			$insideCondition = $matches[1];
 
 			/** Delete body if condition is false */
-			if(!isset($contentObject) || empty($contentObject)){
-				$insideCondition = null;
+			if(empty($conditionOperator)){
+				if(!isset($contentObject) || empty($contentObject)){
+					$insideCondition = null;
+				}
+			} else {
+				switch($conditionOperator){
+					case '=':
+					case '==':
+						if(!($contentObject == $conditionOperand)) $insideCondition = null;
+						break;
+					case '!=':
+						if(!($contentObject != $conditionOperand)) $insideCondition = null;
+						break;
+					case '<':
+						if(!($contentObject < $conditionOperand)) $insideCondition = null;
+						break;
+					case '>':
+						if(!($contentObject > $conditionOperand)) $insideCondition = null;
+						break;
+					case '<=':
+						if(!($contentObject <= $conditionOperand)) $insideCondition = null;
+						break;
+					case '>=':
+						if(!($contentObject >= $conditionOperand)) $insideCondition = null;
+						break;
+				}
 			}
 
 			$content = str_replace($outsideCondition,$insideCondition,$content);
 		}
-
-		/** Conditions with operators */
-		/*while(preg_match('|\{if #([a-z0-9_\-\[\]]+)\s?([=><]+)\s?([a-z0-9_\-\[\]]+)\}|i',$content,$matches)){
-
-		}*/
 		return $content;
 	}
 }
