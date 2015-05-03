@@ -53,6 +53,7 @@ class Parser {
 		if(!$cacheContent){
 			$this->templateContent = $this->parseLoops($this->templateContent,$this->templateParams);
 			$this->templateContent = $this->parseVariables($this->templateContent,$this->templateParams);
+			$this->templateContent = $this->parseConditions($this->templateContent,$this->templateParams);
 			$this->templateContent = preg_replace("/(^[\r\n]*|[\r\n]+)[\s\t]*[\r\n]+/","\n",$this->templateContent);
 			Cache::saveTemplate($this->hashTemplate,$this->templateContent);
 		}
@@ -60,7 +61,7 @@ class Parser {
 	}
 
 	/**
-	 * Parse loops.
+	 * Parse [#loops].
 	 * @param string content to parse
 	 * @param array variables to parse
 	 * @return string parsed content
@@ -84,7 +85,9 @@ class Parser {
 			if(isset($loopObject) && is_array($loopObject) && !empty($loopObject)){
 				foreach($loopObject AS $loopContent){
 					$inlineLoopTmp = $this->parseLoops($insideLoop,$loopContent);
-					$parsedContent .= $this->parseVariables($inlineLoopTmp,(is_array($loopContent) ? array_merge($loopContent,$this->templateParams) : $loopContent));
+					$inlineLoopTmp = $this->parseConditions($inlineLoopTmp,$loopContent);
+					$inlineLoopTmp = $this->parseVariables($inlineLoopTmp,(is_array($loopContent) ? array_merge($loopContent,$this->templateParams) : $loopContent));
+					$parsedContent .= $inlineLoopTmp;
 				}
 			}
 
@@ -94,7 +97,7 @@ class Parser {
 	}
 
 	/**
-	 * Parse variables.
+	 * Parse {#variables}.
 	 * @param string content to parse
 	 * @param array variables to parse
 	 * @return string parsed content
@@ -144,5 +147,42 @@ class Parser {
 		}
 
 		return $contentObject;
+	}
+
+	/**
+	 * Parse {if} conditions.
+	 * @param string content to parse
+	 * @param array variables to parse
+	 * @return string parsed content
+	 */
+	private function parseConditions($content,$params){
+		$this->templateParamsTmp = $params;
+
+		/** Conditions without operators */
+		while(preg_match('|\{if #([a-z0-9_\-\[\]]+)\}|i',$content,$matches)){
+			$conditionName = $matches[1];
+			$contentObject = $this->getVariableTagContent(array("{#".$matches[1]."}"));
+
+			/** Check opening and closing tag */
+			preg_match('|\{if #'.preg_quote($conditionName).'\}(.*?)\{/if #'.preg_quote($conditionName).'\}|is',$content,$matches);
+			if(count($matches) == 0) throw new Exception("Mismatched if tag '$conditionName'.");
+
+			/** Outer and inner if content */
+			$outsideCondition = $matches[0];
+			$insideCondition = $matches[1];
+
+			/** Delete body if condition is false */
+			if(!isset($contentObject) || empty($contentObject)){
+				$insideCondition = null;
+			}
+
+			$content = str_replace($outsideCondition,$insideCondition,$content);
+		}
+
+		/** Conditions with operators */
+		/*while(preg_match('|\{if #([a-z0-9_\-\[\]]+)\s?([=><]+)\s?([a-z0-9_\-\[\]]+)\}|i',$content,$matches)){
+
+		}*/
+		return $content;
 	}
 }
