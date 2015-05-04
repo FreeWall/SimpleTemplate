@@ -156,16 +156,13 @@ class Parser {
 	 * @return string parsed content
 	 */
 	private function markConditions($content){
-		$content = preg_replace_callback('|\{if #([#a-z0-9_\-\[\]\s=><!]+)\}|i',function($tag){
-			global $ifcount;
-			//$ifcount ++;
-			return "{if-".++$ifcount." #".$tag[1]."}";
-		},$content);
-
-		$content = preg_replace_callback('|\{/if}|i',function($tag){
-			global $ifcount;
-			return "{/if-".$ifcount--."}";
-		},$content);
+		$ifcount = 0;
+		while(preg_match('|\{if #|i',$content,$matches)){
+			$ifcount ++;
+			$content = preg_replace_callback('|\{if #([#a-z0-9_\-\[\]\s=><!]+)\}(((?!\{if #).)*)\{/if\}|isU',function($tag) use ($ifcount){
+				return "{if-".$ifcount." #".$tag[1]."}".$tag[2]."{/if-".$ifcount."}";
+			},$content);
+		}
 		return $content;
 	}
 
@@ -178,7 +175,7 @@ class Parser {
 	private function parseConditions($content,$params){
 		$this->templateParamsTmp = $params;
 
-		/** Conditions without and with operators */
+		/** Regular {if} conditions */
 		while(preg_match('|\{if-(\d+) #([a-z0-9_\-\[\]]+)\}|i',$content,$matches) || preg_match('|\{if-(\d+) #([a-z0-9_\-\[\]]+)(\s?)([=><!]+)(\s?)([#a-z0-9_\-\[\]]+)\}|i',$content,$matches)){
 			$conditionID = $matches[1];
 			$conditionName = $matches[2].$matches[3].$matches[4].$matches[5].$matches[6];
@@ -224,6 +221,64 @@ class Parser {
 			}
 
 			$content = str_replace($outsideCondition,$insideCondition,$content);
+		}
+
+		/** Ternary operators */
+		$conditionType = array(0 => 0,1 => 0);
+		while($conditionType[0] = preg_match('|\{#([a-z0-9_\-\[\]]+)(\s?)\?(\s?)([#a-z0-9_\-\[\]]+)(\s?):(\s?)([#a-z0-9_\-\[\]]+)\}|i',$content,$matches)
+		   || $conditionType[1] = preg_match('|\{#([a-z0-9_\-\[\]]+)(\s?)([=><!]+)(\s?)([#a-z0-9_\-\[\]]+)(\s?)\?(\s?)([#a-z0-9_\-\[\]]+)(\s?):(\s?)([#a-z0-9_\-\[\]]+)\}|i',$content,$matches)){
+
+			$contentObject = $this->getVariableTagContent(array("{#".$matches[1]."}"));
+			$conditionOperator = null;
+			if($conditionType[1] == 1){
+				$conditionOperator = $matches[3];
+				$conditionOperand = (preg_match('|#([a-z0-9_\-\[\]]+)|i',$matches[5],$matchesTmp) ? $this->getVariableTagContent(array("{".$matches[5]."}")) : $matches[5]);
+				$contentResult[0] = (preg_match('|#([a-z0-9_\-\[\]]+)|i',$matches[8],$matchesTmp) ? $this->getVariableTagContent(array("{".$matches[8]."}")) : $matches[8]);
+				$contentResult[1] = (preg_match('|#([a-z0-9_\-\[\]]+)|i',$matches[11],$matchesTmp) ? $this->getVariableTagContent(array("{".$matches[11]."}")) : $matches[11]);
+			} else {
+				$contentResult[0] = (preg_match('|#([a-z0-9_\-\[\]]+)|i',$matches[4],$matchesTmp) ? $this->getVariableTagContent(array("{".$matches[4]."}")) : $matches[4]);
+				$contentResult[1] = (preg_match('|#([a-z0-9_\-\[\]]+)|i',$matches[7],$matchesTmp) ? $this->getVariableTagContent(array("{".$matches[7]."}")) : $matches[7]);
+			}
+			$conditionType = array(0 => 0,1 => 0);
+
+			/** Outer condition content */
+			$outsideCondition = $matches[0];
+			$parsedContent = null;
+
+			if(empty($conditionOperator)){
+				if(!isset($contentObject) || empty($contentObject)) $parsedContent = $contentResult[1];
+				else $parsedContent = $contentResult[0];
+			} else {
+				switch($conditionOperator){
+					case '=':
+					case '==':
+						if(!($contentObject == $conditionOperand)) $parsedContent = $contentResult[1];
+						else $parsedContent = $contentResult[0];
+						break;
+					case '!=':
+						if(!($contentObject != $conditionOperand)) $parsedContent = $contentResult[1];
+						else $parsedContent = $contentResult[0];
+						break;
+					case '<':
+						if(!($contentObject < $conditionOperand)) $parsedContent = $contentResult[1];
+						else $parsedContent = $contentResult[0];
+						break;
+					case '>':
+						if(!($contentObject > $conditionOperand)) $parsedContent = $contentResult[1];
+						else $parsedContent = $contentResult[0];
+						break;
+					case '<=':
+						if(!($contentObject <= $conditionOperand)) $parsedContent = $contentResult[1];
+						else $parsedContent = $contentResult[0];
+						break;
+					case '>=':
+						if(!($contentObject >= $conditionOperand)) $parsedContent = $contentResult[1];
+						else $parsedContent = $contentResult[0];
+						break;
+				}
+			}
+
+			$content = str_replace($outsideCondition,$parsedContent,$content);
 		}
 		return $content;
 	}
