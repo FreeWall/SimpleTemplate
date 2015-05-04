@@ -102,7 +102,7 @@ Conditions
 ==========
 SimpleTemplate allows using conditions and ternary operators.
 
-##### Is "set and not empty" condition:
+##### "Is set and not empty" conditions:
 ```html
 {if #articles}
 	<!-- #articles is not empty -->
