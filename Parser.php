@@ -225,19 +225,19 @@ class Parser {
 
 		/** Ternary operators */
 		$conditionType = array(0 => 0,1 => 0);
-		while($conditionType[0] = preg_match('|\{#([a-z0-9_\-\[\]]+)(\s?)\?(\s?)([#a-z0-9_\-\[\]]+)(\s?):(\s?)([#a-z0-9_\-\[\]]+)\}|i',$content,$matches)
-		   || $conditionType[1] = preg_match('|\{#([a-z0-9_\-\[\]]+)(\s?)([=><!]+)(\s?)([#a-z0-9_\-\[\]]+)(\s?)\?(\s?)([#a-z0-9_\-\[\]]+)(\s?):(\s?)([#a-z0-9_\-\[\]]+)\}|i',$content,$matches)){
+		while($conditionType[0] = preg_match('|\{#([a-z0-9_\-\[\]]+)(\s?)\?(\s?)(.+)(\s?):(\s?)(.+)\}|i',$content,$matches)
+		   || $conditionType[1] = preg_match('|\{#([a-z0-9_\-\[\]]+)(\s?)([=><!]+)(\s?)([#a-z0-9_\-\[\]]+)(\s?)\?(\s?)(.+)(\s?):(\s?)(.+)\}|i',$content,$matches)){
 
 			$contentObject = $this->getVariableTagContent(array("{#".$matches[1]."}"));
 			$conditionOperator = null;
 			if($conditionType[1] == 1){
 				$conditionOperator = $matches[3];
 				$conditionOperand = (preg_match('|#([a-z0-9_\-\[\]]+)|i',$matches[5],$matchesTmp) ? $this->getVariableTagContent(array("{".$matches[5]."}")) : $matches[5]);
-				$contentResult[0] = (preg_match('|#([a-z0-9_\-\[\]]+)|i',$matches[8],$matchesTmp) ? $this->getVariableTagContent(array("{".$matches[8]."}")) : $matches[8]);
-				$contentResult[1] = (preg_match('|#([a-z0-9_\-\[\]]+)|i',$matches[11],$matchesTmp) ? $this->getVariableTagContent(array("{".$matches[11]."}")) : $matches[11]);
+				$contentResult[0] = trim(preg_match('|#([a-z0-9_\-\[\]]+)|i',$matches[8],$matchesTmp) ? $this->getVariableTagContent(array("{".$matches[8]."}")) : $matches[8]);
+				$contentResult[1] = trim(preg_match('|#([a-z0-9_\-\[\]]+)|i',$matches[11],$matchesTmp) ? $this->getVariableTagContent(array("{".$matches[11]."}")) : $matches[11]);
 			} else {
-				$contentResult[0] = (preg_match('|#([a-z0-9_\-\[\]]+)|i',$matches[4],$matchesTmp) ? $this->getVariableTagContent(array("{".$matches[4]."}")) : $matches[4]);
-				$contentResult[1] = (preg_match('|#([a-z0-9_\-\[\]]+)|i',$matches[7],$matchesTmp) ? $this->getVariableTagContent(array("{".$matches[7]."}")) : $matches[7]);
+				$contentResult[0] = trim(preg_match('|#([a-z0-9_\-\[\]]+)|i',$matches[4],$matchesTmp) ? $this->getVariableTagContent(array("{".$matches[4]."}")) : $matches[4]);
+				$contentResult[1] = trim(preg_match('|#([a-z0-9_\-\[\]]+)|i',$matches[7],$matchesTmp) ? $this->getVariableTagContent(array("{".$matches[7]."}")) : $matches[7]);
 			}
 			$conditionType = array(0 => 0,1 => 0);
 
