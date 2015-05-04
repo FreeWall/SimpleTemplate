@@ -38,6 +38,7 @@ echo $engine->getOutput();
 	<meta http-equiv="content-type" content="text/html; charset=utf-8"/>
 </head>
 <body>
+	{if #articles}
 	<ul>
 		[#articles]
 		<li>
@@ -47,6 +48,7 @@ echo $engine->getOutput();
 		</li>
 		[/#articles]
 	</ul>
+	{/if}
 </body>
 </html>
 ```
@@ -95,6 +97,39 @@ SimpleTemplate allows using filters separated by vertical bar. Filters (or modif
  - number (decimals = 0, dec_point = '.', thousands_sep = ' ')
  - toAscii
  - webalize
+
+Conditions
+==========
+SimpleTemplate allows using conditions and ternary operators.
+
+##### Is "set and not empty" condition:
+```html
+{if #articles}
+	<!-- #articles is not empty -->
+{/if}
+```
+
+##### Values comparsions:
+```html
+{if #views > 5000}
+	<!-- #views is larger than 5000 -->
+{/if}
+```
+
+##### Variables comparsions:
+```html
+{if #views > #comments}
+	<!-- #views is larger than #comments -->
+{/if}
+```
+
+##### Ternary operators:
+```html
+{#articles ? Not empty : Empty }
+```
+```html
+{#views > 5000 ? Large than 5000 : Smaller than 5000}
+```
 
 Cache
 =====
