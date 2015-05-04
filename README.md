@@ -125,7 +125,7 @@ SimpleTemplate allows using conditions and ternary operators.
 
 ##### Ternary operators:
 ```html
-{#articles ? Not empty : Empty }
+{#articles ? Not empty : Empty}
 ```
 ```html
 {#views > 5000 ? Large than 5000 : Smaller than 5000}
