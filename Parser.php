@@ -159,9 +159,13 @@ class Parser {
 		$ifcount = 0;
 		while(preg_match('|\{if #|i',$content,$matches)){
 			$ifcount ++;
+			$replaced = 0;
+
 			$content = preg_replace_callback('|\{if #([#a-z0-9_\-\[\]\s=><!]+)\}(((?!\{if #).)*)\{/if\}|isU',function($tag) use ($ifcount){
 				return "{if-".$ifcount." #".$tag[1]."}".$tag[2]."{/if-".$ifcount."}";
-			},$content);
+			},$content,-1,$replaced);
+
+			if($replaced == 0) throw new Exception("Mismatched if tag.");
 		}
 		return $content;
 	}
