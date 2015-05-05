@@ -102,33 +102,38 @@ Conditions
 ==========
 SimpleTemplate allows using conditions and ternary operators.
 
-##### "Is set and not empty" conditions:
+##### Common conditions:
 ```html
 {if #articles}
 	<!-- #articles is not empty -->
 {/if}
-```
 
-##### Values comparsions:
-```html
 {if #views > 5000}
 	<!-- #views is larger than 5000 -->
 {/if}
-```
 
-##### Variables comparsions:
-```html
 {if #views > #comments}
 	<!-- #views is larger than #comments -->
 {/if}
 ```
 
+##### Else branchs:
+```html
+{if #articles}
+	<!-- #articles is not empty -->
+{/if}
+{elseif}
+	<!-- #articles is empty -->
+{/elseif}
+```
+
 ##### Ternary operators:
 ```html
 {#articles ? Not empty : Empty}
-```
-```html
+
 {#views > 5000 ? Large than 5000 : Smaller than 5000}
+
+{#views > #comments ? Large than comments : Smaller than comments}
 ```
 
 Cache
