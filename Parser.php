@@ -75,7 +75,7 @@ class Parser {
 			$loopObject = $this->getVariableTagContent($matches,true);
 
 			/** Check opening and closing tag */
-			preg_match('|\[#'.preg_quote($loopName).'\](.*?)\[/#'.preg_quote($loopName).'\]|is',$content,$matches);
+			preg_match('|\[#'.preg_quote($loopName).'\](.*)\[/#'.preg_quote($loopName).'\]|is',$content,$matches);
 			if(count($matches) == 0) throw new Exception("Mismatched loop tag '$loopName'.");
 
 			/** Outer and inner loop content */
@@ -156,22 +156,33 @@ class Parser {
 	 * @return string parsed content
 	 */
 	private function markConditions($content){
-		$ifcount = 0;
+		$ifcount = 1;
 		while(preg_match('|\{if #|i',$content,$matches)){
-			$ifcount ++;
 			$replaced = 0;
 
-			$content = preg_replace_callback('|\{if #([#a-z0-9_\-\[\]\s=><!]+)\}(((?!\{if #).)*)\{/if\}|isU',function($tag) use ($ifcount){
-				return "{if-".$ifcount." #".$tag[1]."}".$tag[2]."{/if-".$ifcount."}";
+			/** Mark {if} conditions with {elseif} branchs */
+			$content = preg_replace_callback('|\{if #([#a-z0-9_\-\[\]\s=><!]+)\}(((?!\{if #).)*)\{/if\}(\s*)(\{elseif\})(.*)(\{/elseif\})|isU',function($tag){
+				global $ifcount;
+				$ifcount ++;
+				return "{if-".$ifcount." #".$tag[1]."}".$tag[2]."{/if-".$ifcount."}".$tag[4]."{elseif-".$ifcount."}".$tag[6]."{/elseif-".$ifcount."}";
 			},$content,-1,$replaced);
 
-			if($replaced == 0) throw new Exception("Mismatched if tag.");
+			/** Mark {if} conditions */
+			if($replaced == 0){
+				$content = preg_replace_callback('|\{if #([#a-z0-9_\-\[\]\s=><!]+)\}(((?!\{if #).)*)\{/if\}|isU',function($tag){
+					global $ifcount;
+					$ifcount ++;
+					return "{if-".$ifcount." #".$tag[1]."}".$tag[2]."{/if-".$ifcount."}";
+				},$content,-1,$replaced);
+
+				if($replaced == 0) throw new Exception("Mismatched if tag.");
+			}
 		}
 		return $content;
 	}
 
 	/**
-	 * Parse {if} conditions.
+	 * Parse {if} and {elseif} conditions.
 	 * @param string content to parse
 	 * @param array variables to parse
 	 * @return string parsed content
@@ -187,44 +198,65 @@ class Parser {
 			$conditionOperand = (preg_match('|#([a-z0-9_\-\[\]]+)|i',$matches[6],$matchesTmp) ? $this->getVariableTagContent(array("{".$matches[6]."}")) : $matches[6]);
 			$contentObject = $this->getVariableTagContent(array("{#".$matches[2]."}"));
 
-			/** Check opening and closing tag */
-			preg_match('|\{if-'.$conditionID.' #'.preg_quote($conditionName).'\}(.*?)\{/if-'.$conditionID.'\}|is',$content,$matches);
+			/** Check opening and closing {if} tags */
+			preg_match('|\{if-'.$conditionID.' #'.preg_quote($conditionName).'\}(.*)\{/if-'.$conditionID.'\}|is',$content,$matches);
 			if(count($matches) == 0) throw new Exception("Mismatched if tag '$conditionName'.");
 
 			/** Outer and inner if content */
 			$outsideCondition = $matches[0];
 			$insideCondition = $matches[1];
 
+			$matches = array();
+
+			/** Check opening and closing {elseif} tags */
+			if(preg_match('|\{elseif-'.$conditionID.'\}|i',$content,$matches)){
+				preg_match('|\{elseif-'.$conditionID.'\}(.*)\{/elseif-'.$conditionID.'\}|is',$content,$matches);
+				if(count($matches) == 0) throw new Exception("Mismatched elseif tag '$conditionName'.");
+			}
+
+			/** Outer and inner if content */
+			$outsideElse = $matches[0];
+			$insideElse = $matches[1];
+
 			/** Delete body if condition is false */
 			if(empty($conditionOperator)){
 				if(!isset($contentObject) || empty($contentObject)){
 					$insideCondition = null;
+				} else {
+					$insideElse = null;
 				}
 			} else {
 				switch($conditionOperator){
 					case '=':
 					case '==':
 						if(!($contentObject == $conditionOperand)) $insideCondition = null;
+						else $insideElse = null;
 						break;
 					case '!=':
 						if(!($contentObject != $conditionOperand)) $insideCondition = null;
+						else $insideElse = null;
 						break;
 					case '<':
 						if(!($contentObject < $conditionOperand)) $insideCondition = null;
+						else $insideElse = null;
 						break;
 					case '>':
 						if(!($contentObject > $conditionOperand)) $insideCondition = null;
+						else $insideElse = null;
 						break;
 					case '<=':
 						if(!($contentObject <= $conditionOperand)) $insideCondition = null;
+						else $insideElse = null;
 						break;
 					case '>=':
 						if(!($contentObject >= $conditionOperand)) $insideCondition = null;
+						else $insideElse = null;
 						break;
 				}
 			}
 
 			$content = str_replace($outsideCondition,$insideCondition,$content);
+			$content = str_replace($outsideElse,$insideElse,$content);
 		}
 
 		/** Ternary operators */
