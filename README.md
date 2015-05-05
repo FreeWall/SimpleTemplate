@@ -117,7 +117,7 @@ SimpleTemplate allows using conditions and ternary operators.
 {/if}
 ```
 
-##### Else branchs:
+##### Else branches:
 ```html
 {if #articles}
 	<!-- #articles is not empty -->
