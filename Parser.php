@@ -261,8 +261,8 @@ class Parser {
 
 		/** Ternary operators */
 		$conditionType = array(0 => 0,1 => 0);
-		while($conditionType[0] = preg_match('|\{#([a-z0-9_\-\[\]]+)(\s?)\?(\s?)(.+)(\s?):(\s?)(.+)\}|i',$content,$matches)
-		   || $conditionType[1] = preg_match('|\{#([a-z0-9_\-\[\]]+)(\s?)([=><!]+)(\s?)([#a-z0-9_\-\[\]]+)(\s?)\?(\s?)(.+)(\s?):(\s?)(.+)\}|i',$content,$matches)){
+		while($conditionType[0] = preg_match('|\{#([a-z0-9_\-\[\]]+)(\s?)\?(\s?)(.+)(\s?):(\s?)(.+)#\}|i',$content,$matches)
+		   || $conditionType[1] = preg_match('|\{#([a-z0-9_\-\[\]]+)(\s?)([=><!]+)(\s?)([#a-z0-9_\-\[\]]+)(\s?)\?(\s?)(.+)(\s?):(\s?)(.+)#\}|i',$content,$matches)){
 
 			$contentObject = $this->getVariableTagContent(array("{#".$matches[1]."}"));
 			$conditionOperator = null;
