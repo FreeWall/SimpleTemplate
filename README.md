@@ -129,11 +129,11 @@ SimpleTemplate allows using conditions and ternary operators.
 
 ##### Ternary operators:
 ```html
-{#articles ? Not empty : Empty}
+{#articles ? Not empty : Empty#}
 
-{#views > 5000 ? Large than 5000 : Smaller than 5000}
+{#views > 5000 ? Large than 5000 : Smaller than 5000#}
 
-{#views > #comments ? Large than comments : Smaller than comments}
+{#views > #comments ? Large than comments : Smaller than comments#}
 ```
 
 Cache
