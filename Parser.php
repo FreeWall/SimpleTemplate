@@ -52,6 +52,7 @@ class Parser {
 		$cacheContent = Cache::loadTemplate($this->hashTemplate);
 		if(!$cacheContent){
 			$this->templateContent = $this->markConditions($this->templateContent);
+			$this->templateContent = $this->markLoops($this->templateContent);
 			$this->templateContent = $this->parseLoops($this->templateContent,$this->templateParams);
 			$this->templateContent = $this->parseConditions($this->templateContent,$this->templateParams);
 			$this->templateContent = $this->parseVariables($this->templateContent,$this->templateParams);
@@ -62,20 +63,44 @@ class Parser {
 	}
 
 	/**
+	 * Mark [#loops] tags with numbers
+	 * @param string content to parse
+	 * @return string parsed content
+	 */
+	private function markLoops($content){
+		$loopcount = 1;
+		while(preg_match('|\[#([a-z]+[a-z0-9_\-\[\]]*)\]|i',$content,$matches)){
+			$replaced = 0;
+
+			/** Mark [#loops] tags */
+			$content = preg_replace_callback('|\[#'.preg_quote($matches[1]).'\](((?!\[#'.preg_quote($matches[1]).'\]).)*)\[\/#'.preg_quote($matches[1]).'\]|isU',function($tag) use ($matches){
+				global $loopcount;
+				$loopcount ++;
+				//print_r($tag);
+				return "[#".$loopcount."-".$matches[1]."]".$tag[1]."[/#".$loopcount."-".$matches[1]."]";
+			},$content,-1,$replaced);
+
+			if($replaced == 0) throw new Exception("Mismatched if tag.");
+		}
+		return $content;
+	}
+
+	/**
 	 * Parse [#loops].
 	 * @param string content to parse
 	 * @param array variables to parse
 	 * @return string parsed content
 	 */
 	private function parseLoops($content,$params){
-		while(preg_match('|\[#([a-z]+[a-z0-9_\-\[\]]*)\]|i',$content,$matches)){
+		while(preg_match('|\[#(\d+)-([a-z]+[a-z0-9_\-\[\]]*)\]|i',$content,$matches)){
 			$parsedContent = null;
-			$loopName = $matches[1];
+			$loopID = $matches[1];
+			$loopName = $matches[2];
 			$this->templateParamsTmp = $params;
 			$loopObject = $this->getVariableTagContent($matches,true);
 
 			/** Check opening and closing tag */
-			preg_match('|\[#'.preg_quote($loopName).'\](.*)\[/#'.preg_quote($loopName).'\]|is',$content,$matches);
+			preg_match('|\[#'.$loopID.'-'.preg_quote($loopName).'\](.*)\[/#'.$loopID.'-'.preg_quote($loopName).'\]|is',$content,$matches);
 			if(count($matches) == 0) throw new Exception("Mismatched loop tag '$loopName'.");
 
 			/** Outer and inner loop content */
@@ -116,7 +141,7 @@ class Parser {
 	 */
 	private function getVariableTagContent($contentTag,$isArray = false){
 		$contentObject = null;
-		$contentName = preg_replace('|^\\'.($isArray ? "[" : "{").'#([a-z0-9_\-]+)(.*)$|i','\\1',$contentTag[0]);
+		$contentName = preg_replace('|^\\'.($isArray ? "[#\d+-" : "{#").'([a-z0-9_\-]+)(.*)$|i','\\1',$contentTag[0]);
 
 		/** Parse array indexes */
 		preg_match_all('|\[([a-z0-9_\-]+)\]|i',$contentTag[0],$dimensions);
