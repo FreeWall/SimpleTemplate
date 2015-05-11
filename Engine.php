@@ -58,6 +58,15 @@ class Engine {
 	}
 
 	/**
+	 * Add custom filter
+	 * @param string
+	 * @param callback
+	 */
+	public function addFilter($s,$callback){
+		Filters::addFilter($s,$callback);
+	}
+
+	/**
 	 * Returns parsed template.
 	 * @return string
 	 */

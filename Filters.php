@@ -36,7 +36,16 @@ class Filters {
 		$params = explode(":",$filter);
 		$filter = strtolower(array_shift($params));
 		array_unshift($params,$s);
-		return (isset(self::$filters[$filter]) ? call_user_func_array(Filters::$filters[$filter],$params) : $s);
+		return (isset(self::$filters[$filter]) ? call_user_func_array(self::$filters[$filter],$params) : $s);
+	}
+
+	/**
+	 * Add custom filter.
+	 * @param string
+	 * @param callback
+	 */
+	public static function addFilter($s,$callback){
+		self::$filters[strtolower($s)] = $callback;
 	}
 
 	/**
