@@ -161,7 +161,7 @@ class Parser {
 			$replaced = 0;
 
 			/** Mark {if} conditions with {elseif} branchs */
-			$content = preg_replace_callback('|\{if #([#a-z0-9_\-\[\]\s=><!]+)\}(((?!\{if #).)*)\{/if\}(\s*)(\{elseif\})(.*)(\{/elseif\})|isU',function($tag){
+			$content = preg_replace_callback('~\{if #([#a-z0-9_\-\[\]\s=><!]+)\}(((?!\{if #|\/if\}).)*)\{/if\}(\s*)(\{elseif\})(.*)(\{/elseif\})~isU',function($tag){
 				global $ifcount;
 				$ifcount ++;
 				return "{if-".$ifcount." #".$tag[1]."}".$tag[2]."{/if-".$ifcount."}".$tag[4]."{elseif-".$ifcount."}".$tag[6]."{/elseif-".$ifcount."}";
