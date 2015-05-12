@@ -97,6 +97,7 @@ SimpleTemplate allows using filters separated by vertical bar. Filters (or modif
  - number (decimals = 0, dec_point = '.', thousands_sep = ' ')
  - toAscii
  - webalize
+ - bytes (precision = 1)
 
 Conditions
 ==========
