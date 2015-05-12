@@ -23,7 +23,8 @@ class Filters {
 		"date"       => "SimpleTemplate\\Filters::date",
 		"number"     => "SimpleTemplate\\Filters::number",
 		"toascii"    => "SimpleTemplate\\Filters::toAscii",
-		"webalize"   => "SimpleTemplate\\Filters::webalize"
+		"webalize"   => "SimpleTemplate\\Filters::webalize",
+		"bytes"      => "SimpleTemplate\\Filters::bytes"
 	);
 
 	/**
@@ -188,6 +189,25 @@ class Filters {
 		$s = preg_replace('#[^a-z0-9]+#i','-',$s);
 		$s = trim($s,'-');
 		return $s;
+	}
+
+	/**
+	 * Returns human readable file size.
+	 * @param string
+	 * @param number
+	 * @return string
+	 */
+	public static function bytes($s,$precision = 1){
+		if($s == 0) return "0 B";
+		if($s < 1024) return $s." B";
+		$s /= 1024;
+		if($s < 1024) return round($s,$precision)." kB";
+		$s /= 1024;
+		if($s < 1024) return round($s,$precision)." MB";
+		$s /= 1024;
+		if($s < 1024) return round($s,$precision)." GB";
+		$s /= 1024;
+		return round($s,$precision)." TB";
 	}
 
 	/**
