@@ -22,6 +22,7 @@ class Filters {
 		"repeat"     => "SimpleTemplate\\Filters::repeat",
 		"date"       => "SimpleTemplate\\Filters::date",
 		"number"     => "SimpleTemplate\\Filters::number",
+		"round"      => "SimpleTemplate\\Filters::round",
 		"toascii"    => "SimpleTemplate\\Filters::toAscii",
 		"webalize"   => "SimpleTemplate\\Filters::webalize",
 		"bytes"      => "SimpleTemplate\\Filters::bytes"
@@ -142,6 +143,15 @@ class Filters {
 	 */
 	public static function number($number,$decimals = 0,$dec_point = '.',$thousands_sep = ' '){
 		return number_format((double)$number,(Validate::isNumber($decimals) ? $decimals : 0),$dec_point,$thousands_sep);
+	}
+
+	/**
+	 * Rounds a float.
+	 * @param string
+	 * @return string
+	 */
+	public static function round($number,$precision = 0){
+		return round($number,$precision);
 	}
 
 	/**
