@@ -95,6 +95,7 @@ SimpleTemplate allows using filters separated by vertical bar. Filters (or modif
  - repeat (count)
  - date (format)
  - number (decimals = 0, dec_point = '.', thousands_sep = ' ')
+ - round (precision = 0)
  - toAscii
  - webalize
  - bytes (precision = 1)
