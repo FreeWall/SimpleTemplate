@@ -111,7 +111,7 @@ class Parser {
 			if(isset($loopObject) && is_array($loopObject) && !empty($loopObject)){
 				foreach($loopObject AS $loopContent){
 					$inlineLoopTmp = $this->parseLoops($insideLoop,$loopContent);
-					$inlineLoopTmp = $this->parseConditions($inlineLoopTmp,$loopContent);
+					$inlineLoopTmp = $this->parseConditions($inlineLoopTmp,(is_array($loopContent) ? array_merge($loopContent,$this->templateParams) : $loopContent));
 					$inlineLoopTmp = $this->parseVariables($inlineLoopTmp,(is_array($loopContent) ? array_merge($loopContent,$this->templateParams) : $loopContent));
 					$parsedContent .= $inlineLoopTmp;
 				}
