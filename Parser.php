@@ -221,6 +221,9 @@ class Parser {
 			$conditionName = $matches[2].$matches[3].$matches[4].$matches[5].$matches[6];
 			$conditionOperator = $matches[4];
 			$conditionOperand = (preg_match('|#([a-z0-9_\-\[\]]+)|i',$matches[6],$matchesTmp) ? $this->getVariableTagContent(array("{".$matches[6]."}")) : $matches[6]);
+			if($conditionOperand == "true") $conditionOperand = true;
+			else if($conditionOperand == "false") $conditionOperand = false;
+			else if($conditionOperand == "null") $conditionOperand = null;
 			$contentObject = $this->getVariableTagContent(array("{#".$matches[2]."}"));
 
 			/** Check opening and closing {if} tags */
@@ -294,6 +297,9 @@ class Parser {
 			if($conditionType[1] == 1){
 				$conditionOperator = $matches[3];
 				$conditionOperand = (preg_match('|#([a-z0-9_\-\[\]]+)|i',$matches[5],$matchesTmp) ? $this->getVariableTagContent(array("{".$matches[5]."}")) : $matches[5]);
+				if($conditionOperand == "true") $conditionOperand = true;
+				else if($conditionOperand == "false") $conditionOperand = false;
+				else if($conditionOperand == "null") $conditionOperand = null;
 				$contentResult[0] = trim($matches[8]);
 				$contentResult[1] = trim($matches[11]);
 			} else {
