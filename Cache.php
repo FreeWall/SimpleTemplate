@@ -9,20 +9,30 @@
 namespace SimpleTemplate;
 
 /** Init cache folder */
-Cache::$cacheFolder = __DIR__."/Cache/";
+Cache::$cacheFolder = CACHE_PATH;
 
 class Cache {
 	/** @var string */
 	public static $cacheFolder;
 	/** @var bool */
-	private static $enabled = true;
+	private static $enabled = false;
+	/** @var integer */
+	private static $cacheAge = 3600;
 
 	/**
 	 * Cache settings.
 	 * @param bool
 	 */
-	public static function enabled($bool){
+	public static function setEnabled($bool){
 		self::$enabled = (bool)$bool;
+	}
+
+	/**
+	 * Set cache folder.
+	 * @param path
+	 */
+	public static function setFolder($folder){
+		self::$cacheFolder = $folder;
 	}
 
 	/**
@@ -49,5 +59,16 @@ class Cache {
 		fwrite($fp,$content);
 		fclose($fp);
 		return true;
+	}
+
+	/**
+	 * Remove old template cache file
+	 */
+	public static function clearCacheFolder(){
+		foreach(scandir(self::$cacheFolder) AS $values){
+			if(strstr($values,".cache.tpl") && filemtime(self::$cacheFolder.$values)+self::$cacheAge < time()){
+				@unlink(self::$cacheFolder.$values);
+			}
+		}
 	}
 }

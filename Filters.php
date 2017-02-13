@@ -21,6 +21,7 @@ class Filters {
 		"truncate"   => "SimpleTemplate\\Filters::truncate",
 		"repeat"     => "SimpleTemplate\\Filters::repeat",
 		"date"       => "SimpleTemplate\\Filters::date",
+		"datetime"   => "SimpleTemplate\\Filters::datetime",
 		"number"     => "SimpleTemplate\\Filters::number",
 		"round"      => "SimpleTemplate\\Filters::round",
 		"toascii"    => "SimpleTemplate\\Filters::toAscii",
@@ -131,6 +132,15 @@ class Filters {
 			$time = new \DateTime($time);
 		}
 		return strpos($format,'%') === false ? $time->format($format) : strftime($format,$time->format('U'));
+	}
+
+	/**
+	 * Returns datetime format.
+	 * @param string|int|DateTime|DateInterval
+	 * @return string
+	 */
+	public static function datetime($time){
+		return self::date($time,"d.m.Y H:i");
 	}
 
 	/**

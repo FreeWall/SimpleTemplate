@@ -25,8 +25,10 @@ class Engine {
 	 * @param array
 	 */
 	public function __construct($params){
+		global $lang;
+		Cache::clearCacheFolder();
 		$this->parser = new Parser();
-		$this->parser->setParams($params);
+		$this->parser->setParams(array("global" => \Eshop::getGlobalVariables(),"lang" => $lang)+$params);
 	}
 
 	/**
@@ -34,7 +36,7 @@ class Engine {
 	 * @param boolean
 	 */
 	public function setCache($bool){
-		Cache::enabled($bool);
+		Cache::setEnabled($bool);
 	}
 
 	/**
