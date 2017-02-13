@@ -198,13 +198,14 @@ class Parser {
 
 		/** Mark {elseif} branchs to {if} conditions */
 		while(preg_match('|\{elseif\}|i',$content,$matches)){
-			$content = preg_replace_callback('~\{if-(\d+) #([#a-z0-9_\-\[\]\s=><!]+)\}(((?!\{if #|\/if\}).)*)\{/if-\1\}(\s*)(\{elseif\})(((?!elseif\}).)*)(\{/elseif\})~isU',function($tag){
+			$content = preg_replace_callback('~\{if-(\d+) #([#a-z0-9_\-\[\]\s=><!]+)\}(((?!elseif\}).)*)\{/if-\1\}(\s*)(\{elseif\})(((?!elseif\}).)*)(\{/elseif\})~isU',function($tag){
 				$ifcount = $tag[1];
 				return "{if-".$ifcount." #".$tag[2]."}".$tag[3]."{/if-".$ifcount."}".$tag[5]."{elseif-".$ifcount."}".$tag[7]."{/elseif-".$ifcount."}";
 			},$content,-1,$replaced);
 
 			if($replaced == 0) throw new Exception("Mismatched elseif tag.");
 		}
+
 		return $content;
 	}
 
