@@ -15,7 +15,7 @@ class Cache {
 	/** @var string */
 	public static $cacheFolder;
 	/** @var bool */
-	private static $enabled = false;
+	private static $enabled = true;
 	/** @var integer */
 	private static $cacheAge = 3600;
 
