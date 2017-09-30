@@ -14,19 +14,20 @@ class Filters {
 	 * @var array
 	 */
 	private static $filters = array(
-		"upper"      => "SimpleTemplate\\Filters::upper",
-		"lower"      => "SimpleTemplate\\Filters::lower",
-		"firstupper" => "SimpleTemplate\\Filters::firstUpper",
-		"firstlower" => "SimpleTemplate\\Filters::firstLower",
-		"truncate"   => "SimpleTemplate\\Filters::truncate",
-		"repeat"     => "SimpleTemplate\\Filters::repeat",
-		"date"       => "SimpleTemplate\\Filters::date",
-		"datetime"   => "SimpleTemplate\\Filters::datetime",
-		"number"     => "SimpleTemplate\\Filters::number",
-		"round"      => "SimpleTemplate\\Filters::round",
-		"toascii"    => "SimpleTemplate\\Filters::toAscii",
-		"webalize"   => "SimpleTemplate\\Filters::webalize",
-		"bytes"      => "SimpleTemplate\\Filters::bytes"
+		"upper"        => "SimpleTemplate\\Filters::upper",
+		"lower"        => "SimpleTemplate\\Filters::lower",
+		"firstupper"   => "SimpleTemplate\\Filters::firstUpper",
+		"firstlower"   => "SimpleTemplate\\Filters::firstLower",
+		"truncate"     => "SimpleTemplate\\Filters::truncate",
+		"wordtruncate" => "SimpleTemplate\\Filters::wordtruncate",
+		"repeat"       => "SimpleTemplate\\Filters::repeat",
+		"date"         => "SimpleTemplate\\Filters::date",
+		"datetime"     => "SimpleTemplate\\Filters::datetime",
+		"number"       => "SimpleTemplate\\Filters::number",
+		"round"        => "SimpleTemplate\\Filters::round",
+		"toascii"      => "SimpleTemplate\\Filters::toAscii",
+		"webalize"     => "SimpleTemplate\\Filters::webalize",
+		"bytes"        => "SimpleTemplate\\Filters::bytes"
 	);
 
 	/**
@@ -102,6 +103,25 @@ class Filters {
 			else return self::substring($s,0,$maxLen).$append;
 		}
 		return $s;
+	}
+
+	/**
+	 * Truncates string to length to the closest word.
+	 * @param string
+	 * @param int
+	 * @param string
+	 * @return string
+	 */
+	public static function wordtruncate($s,$maxLen,$append = "\xE2\x80\xA6"){
+		$parts = preg_split('/([\s\n\r]+)/', $s, null, PREG_SPLIT_DELIM_CAPTURE);
+		$parts_count = count($parts);
+		$length = 0;
+		$last_part = 0;
+		for(;$last_part<$parts_count;++$last_part){
+			$length += strlen($parts[$last_part]);
+			if($length > $maxLen){break;}
+		}
+		return implode(array_slice($parts,0,$last_part)).($length > $maxLen ? $append : "");
 	}
 
 	/**
